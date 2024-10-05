@@ -1,5 +1,5 @@
 "use client";
-import Template1 from "@/Templates/Template1";
+import Template1 from "@/components/Templates/Template1";
 import { Button } from "@/components/ui/button";
 import PersonalDetails from "@/components/TemplateComponents/PersonalDetails";
 // import EducationDetails from "@/components/TemplateComponents/EducationDetails";
@@ -22,7 +22,7 @@ export default function ResumeBuilder() {
 
         <div className="bg-white w-full p-4 rounded-lg shadow-lg">
           <h2 className="text-xl font-semibold mb-4 text-center">Preview</h2>
-          <Template1 size="full" />
+          <Template1 />
         </div>
       </div>
     </div>
