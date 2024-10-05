@@ -49,7 +49,7 @@ const EducationDetails = () => {
     <div>
       <h1 className="font-semibold text-lg mb-3"> Education Details</h1>
       <div className="flex flex-wrap gap-2">
-        {data.map((item, index) => (
+        {data.map((item) => (
           <CardWrapper
             key={item.index}
             handleInputChange={handleInputChange}
@@ -75,7 +75,7 @@ const EducationDetails = () => {
 
 export default EducationDetails;
 
-let CardWrapper = ({
+const CardWrapper = ({
   data,
   handleInputChange,
 }: {

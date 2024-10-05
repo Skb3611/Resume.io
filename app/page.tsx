@@ -1,22 +1,16 @@
 "use client"
-import Link from "next/link"
+
 import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
 import {
   Accordion,
   AccordionContent,
   AccordionItem,
   AccordionTrigger,
 } from "@/components/ui/accordion"
-import { FileText, Layout, Zap, Award, Star, Download, Edit, Share2 } from "lucide-react"
+import {  Layout, Zap, Award, Download, Edit, Share2 } from "lucide-react"
 import { useRef } from "react"
 
 export default function Page() {
-  let featuresRef = useRef<HTMLDivElement>(null)
-  let templatesRef = useRef<HTMLDivElement>(null)
-  const scrollToSection = (ref: React.RefObject<HTMLElement>) => {
-    ref.current?.scrollIntoView({ behavior: "smooth" })
-  }
   return (
     <div className="flex flex-col min-h-screen">
  

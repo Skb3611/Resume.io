@@ -2,16 +2,14 @@ import React, { useState } from "react";
 import {
   Card,
   CardContent,
-  CardDescription,
-  CardFooter,
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
 import { Label } from "../ui/label";
 import { Input } from "../ui/input";
-import { addDays, format } from "date-fns";
+import { format } from "date-fns";
 import { Calendar as CalendarIcon } from "lucide-react";
-import { DateRange } from "react-day-picker";
+
 import {
   Carousel,
   CarouselContent,
@@ -75,7 +73,7 @@ const Experience = () => {
         <CarouselContent>
           {data.map((item) => {
             return (
-              <CarouselItem>
+              <CarouselItem key={item.index}>
                 <CardWrapper
                   key={item.index}
                   data={item}

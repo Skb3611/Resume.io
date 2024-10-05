@@ -1,10 +1,10 @@
 
 import React, { useState } from 'react'
-import { Label } from '../ui/label'
+
 import { Input } from '../ui/input'
 import { Card,CardContent,CardHeader,CardTitle } from '../ui/card'
 import { Button } from '../ui/button'
-import { skip } from 'node:test'
+
 
 const Skills = () => {
     const [data, setdata] = useState([{skill:"",id:0}])
