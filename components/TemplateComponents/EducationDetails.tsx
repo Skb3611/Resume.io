@@ -13,17 +13,22 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover";
+import { EducationData } from "@/app/editor/page";
+import {
+  Carousel,
+  CarouselContent,
+  CarouselItem,
+  CarouselNext,
+  CarouselPrevious,
+} from "@/components/ui/carousel";
 
-interface Data {
-  index: number;
-  date: Date | null | undefined;
-  degree: string;
-  location: string;
-}
-const EducationDetails = () => {
-  const [data, setdata] = useState<Data[]>([
-    { index: 0, date: null, degree: "", location: "" },
-  ]);
+const EducationDetails = ({
+  data,
+  setdata,
+}: {
+  data: EducationData[];
+  setdata: React.Dispatch<React.SetStateAction<EducationData[]>>;
+}) => {
   const [index, setindex] = useState(1);
 
   const addCard = () => {
@@ -32,7 +37,7 @@ const EducationDetails = () => {
   };
   const handleInputChange = (
     cardIndex: number,
-    field: keyof Data,
+    field: keyof EducationData,
     value: string | Date
   ) => {
     setdata((prevData) =>
@@ -49,14 +54,22 @@ const EducationDetails = () => {
     <div>
       <h1 className="font-semibold text-lg mb-3"> Education Details</h1>
       <div className="flex flex-wrap gap-2">
-        {data.map((item) => (
-          <CardWrapper
-            key={item.index}
-            handleInputChange={handleInputChange}
-            data={item}
-          />
-        ))}
+        <Carousel className="w-[90%] mx-auto">
+          <CarouselContent>
+            {data.map((item) => (
+              <CarouselItem className="basis-1/2" key={item.index}>
+                <CardWrapper
+                  handleInputChange={handleInputChange}
+                  data={item}
+                />
+              </CarouselItem>
+            ))}
+          </CarouselContent>
+          <CarouselPrevious />
+          <CarouselNext />
+        </Carousel>
       </div>
+
       <div className="btns space-x-3">
         <Button className="mt-4" onClick={addCard}>
           Add More
@@ -79,8 +92,12 @@ const CardWrapper = ({
   data,
   handleInputChange,
 }: {
-  data: Data;
-  handleInputChange: (index: number, field: keyof Data, value: string|Date) => void;
+  data: EducationData;
+  handleInputChange: (
+    index: number,
+    field: keyof EducationData,
+    value: string | Date
+  ) => void;
 }) => {
   return (
     <Card className="p-4">
@@ -118,14 +135,16 @@ const CardWrapper = ({
 
 function DatePicker({
   handleInputChange,
-  data
+  data,
 }: {
-  handleInputChange: (index: number, field: keyof Data, value: string|Date) => void;
-  data: Data
+  handleInputChange: (
+    index: number,
+    field: keyof EducationData,
+    value: string | Date
+  ) => void;
+  data: EducationData;
 }) {
-  const [date, setDate] = React.useState<Date>();
-  const setDateFunc = (date: Date|undefined) => {
-    setDate(date);
+  const setDateFunc = (date: Date | undefined) => {
     handleInputChange(data.index, "date", date || "");
   };
   return (
@@ -134,18 +153,18 @@ function DatePicker({
         <Button
           variant={"outline"}
           className={cn(
-            "w-[280px] justify-start text-left font-normal",
-            !date && "text-muted-foreground"
+            "w-full justify-start text-left font-normal",
+            !data.date && "text-muted-foreground"
           )}
         >
           <CalendarIcon className="mr-2 h-4 w-4" />
-          {date ? format(date, "PPP") : <span>Pick a date</span>}
+          {data.date ? format(data.date, "PPP") : <span>Pick a date</span>}
         </Button>
       </PopoverTrigger>
       <PopoverContent className="w-auto p-0">
         <Calendar
           mode="single"
-          selected={date}
+          selected={data.date || undefined}
           onSelect={setDateFunc}
           initialFocus
         />
