@@ -2,7 +2,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import React, { useState } from "react";
-import { PersonalData } from "@/app/editor/page"
+import { PersonalData } from "@/app/editor/page";
 export default function data({
   data,
   setdata,
@@ -21,6 +21,7 @@ export default function data({
       <div>
         <Label htmlFor="name">Name</Label>
         <Input
+        placeholder="eg. John Doe"
           id="name"
           name="name"
           value={data?.name || ""}
@@ -30,6 +31,7 @@ export default function data({
       <div>
         <Label htmlFor="role">Role</Label>
         <Input
+        placeholder="eg. Journalist, Editor"
           id="role"
           name="role"
           value={data?.role || ""}
@@ -38,11 +40,17 @@ export default function data({
       </div>
       <div>
         <Label htmlFor="aboutme">About me</Label>
-        <Textarea onChange={handleChange} value={data?.aboutme || ""} name="aboutme"></Textarea>
+        <Textarea
+        placeholder="eg. I am a journalist passionate about uncovering the truth and producing high-quality content."
+          onChange={handleChange}
+          value={data?.aboutme || ""}
+          name="aboutme"
+        ></Textarea>
       </div>
       <div>
         <Label htmlFor="phone">Phone number</Label>
         <Input
+          placeholder="eg. +1 (555) 555-5555"
           type="tel"
           id="phone"
           name="phone"
@@ -53,6 +61,7 @@ export default function data({
       <div>
         <Label htmlFor="email">Email</Label>
         <Input
+          placeholder="eg. john@example.com"
           type="email"
           id="email"
           name="email"
@@ -63,6 +72,7 @@ export default function data({
       <div>
         <Label htmlFor="location">City, Country</Label>
         <Input
+          placeholder="eg. New York, USA"
           id="address"
           name="address"
           value={data?.address || ""}

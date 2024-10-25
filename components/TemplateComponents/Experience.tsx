@@ -1,10 +1,5 @@
 import React, { useState } from "react";
-import {
-  Card,
-  CardContent,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Label } from "../ui/label";
 import { Input } from "../ui/input";
 import { format } from "date-fns";
@@ -29,12 +24,25 @@ import {
 import { Textarea } from "../ui/textarea";
 import { ExperienceData } from "@/app/editor/page";
 
-const Experience = ({data, setdata}: {data: ExperienceData[], setdata: React.Dispatch<React.SetStateAction<ExperienceData[]>>}) => {
+const Experience = ({
+  data,
+  setdata,
+}: {
+  data: ExperienceData[];
+  setdata: React.Dispatch<React.SetStateAction<ExperienceData[]>>;
+}) => {
   const [index, setindex] = useState(data.length);
   const addCard = () => {
     setdata([
       ...data,
-      { index: index, startdate: null, enddate: null, company: "", position: "", summary: "" },
+      {
+        index: index,
+        startdate: null,
+        enddate: null,
+        company: "",
+        position: "",
+        summary: "",
+      },
     ]);
     setindex(index + 1);
   };
@@ -77,16 +85,15 @@ const Experience = ({data, setdata}: {data: ExperienceData[], setdata: React.Dis
         <CarouselNext />
       </Carousel>
       <div className="btns space-x-3">
-        <Button className="mt-4" onClick={addCard}>
+        <Button className="mt-3" onClick={addCard}>
           Add More
         </Button>
         <Button
-          className="mt-4"
+          className="mt-3"
           disabled={data.length === 1}
           onClick={removeCard}
         >
-          {" "}
-          Remove{" "}
+          Remove
         </Button>
       </div>
     </div>
@@ -116,7 +123,7 @@ const CardWrapper = ({
           <div className="mb-3">
             <Label htmlFor="company">Company</Label>
             <Input
-            value={data.company}
+              value={data.company}
               type="text"
               id="company"
               name="company"
@@ -129,7 +136,7 @@ const CardWrapper = ({
           <div className="mb-3">
             <Label htmlFor="position">Position</Label>
             <Input
-            value={data.position}
+              value={data.position}
               type="text"
               id="position"
               name="position"
@@ -142,16 +149,26 @@ const CardWrapper = ({
 
           <div className="flex flex-col gap-1 mb-2">
             <Label htmlFor="startDate">Start Date</Label>
-            <DatePicker handleInputChange={handleInputChange} data={data} name="startdate" value={data.startdate}/>
+            <DatePicker
+              handleInputChange={handleInputChange}
+              data={data}
+              name="startdate"
+              value={data.startdate}
+            />
           </div>
           <div className="flex flex-col gap-1 mb-2">
             <Label htmlFor="endDate">End Date</Label>
-            <DatePicker handleInputChange={handleInputChange} data={data} name="enddate" value={data.enddate} />
+            <DatePicker
+              handleInputChange={handleInputChange}
+              data={data}
+              name="enddate"
+              value={data.enddate}
+            />
           </div>
           <div className="mb-2">
             <Label htmlFor="summary">Short Summary</Label>
             <Textarea
-            value={data.summary}
+              value={data.summary}
               id="summary"
               name="summary"
               placeholder="Short Summary"
@@ -171,21 +188,21 @@ function DatePicker({
   name,
   handleInputChange,
   data,
-  value
+  value,
 }: {
-  name:keyof ExperienceData
+  name: keyof ExperienceData;
   handleInputChange: (
     index: number,
     field: keyof ExperienceData,
     value: string | Date
   ) => void;
-  data: ExperienceData,
-  value: Date
+  data: ExperienceData;
+  value: Date | null | undefined;
 }) {
   const [date, setDate] = React.useState<Date>();
   const setDateFunc = (date: Date | undefined) => {
     setDate(date);
-    handleInputChange(data.index, name , date || "");
+    handleInputChange(data.index, name, date?.toString() || "");
   };
   return (
     <Popover>

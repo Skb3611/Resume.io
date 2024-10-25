@@ -9,9 +9,11 @@ import data from "./PersonalDetails";
 const Skills = ({
   data,
   setdata,
+
 }: {
   data: SkillData[];
   setdata: React.Dispatch<React.SetStateAction<SkillData[]>>;
+
 }) => {
   const [index, setIndex] = useState(data.length);
   const addCard = () => {

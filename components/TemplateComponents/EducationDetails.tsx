@@ -28,11 +28,12 @@ const EducationDetails = ({
 }: {
   data: EducationData[];
   setdata: React.Dispatch<React.SetStateAction<EducationData[]>>;
+
 }) => {
   const [index, setindex] = useState(1);
 
   const addCard = () => {
-    setdata([...data, { index: index, date: null, degree: "", location: "" }]);
+    setdata([...data, { index: index, date: null, degree: "", location: "",university:"" }]);
     setindex(index + 1);
   };
   const handleInputChange = (
@@ -125,6 +126,17 @@ const CardWrapper = ({
             value={data.location}
             onChange={(e) =>
               handleInputChange(data.index, "location", e.target.value)
+            }
+          />
+        </div>
+        <div className="mb-2">
+          <Label htmlFor="University">University</Label>
+          <Input
+            id="university"
+            name="university"
+            value={data.university}
+            onChange={(e) =>
+              handleInputChange(data.index, "university", e.target.value)
             }
           />
         </div>
