@@ -1,4 +1,3 @@
-"use client"
 
 import { Button } from "@/components/ui/button"
 import {
@@ -8,7 +7,6 @@ import {
   AccordionTrigger,
 } from "@/components/ui/accordion"
 import { Layout, Zap, Award, Download, Edit, Share2 } from "lucide-react"
-import { useRef } from "react"
 
 export default function Page() {
 
