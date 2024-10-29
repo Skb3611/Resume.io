@@ -1,4 +1,4 @@
-import NextAuth from "next-auth";
+import NextAuth, { SessionStrategy } from "next-auth";
 import GoogleProvider from "next-auth/providers/google";
 import TwitterProvider from "next-auth/providers/twitter";
 import LinkedInProvider from "next-auth/providers/linkedin";
@@ -6,6 +6,7 @@ import { NextApiRequest, NextApiResponse } from "next";
 import { PrismaAdapter } from "@auth/prisma-adapter";
 import { PrismaClient } from "@prisma/client";
 import { prisma } from "@/lib/prisma";
+import { Session } from "inspector/promises";
 
 export const authOptions = {
   providers: [
@@ -68,8 +69,9 @@ export const authOptions = {
     signIn: "/",
     signOut: "/",
   },
-  session:{strategy: "jwt"},
+  session:{strategy: "jwt" as SessionStrategy},
   callbacks: {
+    
     async jwt({ token, account }: { token: any; account?: any }) {
       if (account) {
         console.log(account)

@@ -13,23 +13,59 @@ import {
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Label } from "./ui/label";
 import { Input } from "./ui/input";
+import Image from "next/image";
 
+interface Data{
+  email:string;
+  password:string;
+  name:string;
+}
 const Connection = () => {
+  const [data, setdata] = useState<Data>({
+    name:"",
+    email:"",
+    password:""
+  })
   const { data: session } = useSession();
   console.log(session);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
 
-  const handleLogin = (e: React.FormEvent) => {
+  const handleLogin = async(e: React.FormEvent) => {
     e.preventDefault();
+    let res = await fetch("/api/customauth/login", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(data),
+    });
+    console.log(await res.json())
     setIsDialogOpen(false);
   };
 
-  const handleSignup = (e: React.FormEvent) => {
+  const handleSignup = async(e: React.FormEvent) => {
     e.preventDefault();
+    let res = await fetch("/api/customauth/signup", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(data),
+    });
+    console.log(await res.json())
     setIsDialogOpen(false);
   };
 
-  const handleLogout = () => {};
+  const handlechange=(e:React.ChangeEvent<HTMLInputElement>) => {
+    setdata({...data,[e.target.id]:e.target.value})
+  }
+  const handlesignup = (e:React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    console.log(data)
+    setIsDialogOpen(false);
+
+  }
+  
 
   return (
     <>
@@ -38,9 +74,12 @@ const Connection = () => {
           {session ? (
             <Button variant={"link"} className="p-0">
               <img
-                src={session.user?.image}
+                height={100}
+                width={100}
+                src={session.user?.image ?? ""}
                 alt="profile"
                 className="w-full h-full rounded-full"
+                loading="lazy"
               />
             </Button>
           ) : (
@@ -77,11 +116,11 @@ const Connection = () => {
                 <form onSubmit={handleLogin} className="space-y-4">
                   <div className="space-y-2">
                     <Label htmlFor="email">Email</Label>
-                    <Input id="email" type="email" required />
+                    <Input value={data.email} id="email" type="email" required onChange={(e)=>handlechange(e)}/>
                   </div>
                   <div className="space-y-2">
                     <Label htmlFor="password">Password</Label>
-                    <Input id="password" type="password" required />
+                    <Input value={data.password} id="password" type="password" required onChange={(e)=>handlechange(e)}/>
                   </div>
                   <Button type="submit" className="w-full">
                     Login
@@ -89,18 +128,18 @@ const Connection = () => {
                 </form>
               </TabsContent>
               <TabsContent value="signup">
-                <form onSubmit={handleSignup} className="space-y-4">
+                <form onSubmit={handleSignup} className="space-y-3">
                   <div className="space-y-2">
-                    <Label htmlFor="signup-email">Email</Label>
-                    <Input id="signup-email" type="email" required />
+                    <Label htmlFor="signup-email">Name</Label>
+                    <Input value={data.name} id="name" type="name" required onChange={(e)=>handlechange(e)}/>
                   </div>
                   <div className="space-y-2">
-                    <Label htmlFor="signup-password">Password</Label>
-                    <Input id="signup-password" type="password" required />
+                    <Label htmlFor="signup-password">Email</Label>
+                    <Input value={data.email} id="email" type="email" required onChange={(e)=>handlechange(e)}/>
                   </div>
                   <div className="space-y-2">
-                    <Label htmlFor="confirm-password">Confirm Password</Label>
-                    <Input id="confirm-password" type="password" required />
+                    <Label htmlFor="confirm-password">Password</Label>
+                    <Input value={data.password} id="password" type="password" required onChange={(e)=>handlechange(e)}/>
                   </div>
                   <Button type="submit" className="w-full">
                     Sign Up
