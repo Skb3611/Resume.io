@@ -1,6 +1,7 @@
 import { prisma } from "@/lib/prisma";
 import { NextRequest, NextResponse } from "next/server";
 import bcrypt from "bcrypt";
+import { signToken } from "@/lib/jwt";
 export async function POST(req: Request) {
   try {
     let { email, password } = await req.json();
@@ -9,12 +10,18 @@ export async function POST(req: Request) {
         email: email,
       },
     });
-    if (!user) return NextResponse.json({message:"No user Found. Try Sign In"});
+    if (!user) return NextResponse.json({message:"No user Found with this email.",status:false});
     let password_check = await bcrypt.compare(password, user.password ?? "");
-    return password_check
-      ? NextResponse.json({ message: "true" })
-      : NextResponse.json({ message: "false" });
+    let response,token ;
+      if (password_check) {
+          response = NextResponse.json({ message: "Login Successful", status: true,username:user.name});
+          token = signToken(user.name ?? "");
+          response.cookies.set("token", token, { path: "/", httpOnly: true });
+          return response;
+      } else{
+        return NextResponse.json({message:"Invalid Credentials",status:false});
+      }
   } catch (error: any) {
-    return NextResponse.json({ error: error.message });
+    return NextResponse.json({ error: error.message,status:false });
   }
 }

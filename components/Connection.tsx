@@ -1,5 +1,5 @@
 "use client";
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { useSession, signIn, signOut } from "next-auth/react";
 import { Button } from "./ui/button";
 import {
@@ -13,24 +13,57 @@ import {
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Label } from "./ui/label";
 import { Input } from "./ui/input";
+import { getCookies, clearCookies } from "@/lib/getcookies";
+import { decodeToken } from "@/lib/jwt";
+import { toast } from "react-toastify";
+
+import { Avatar, AvatarFallback, AvatarImage } from "./ui/avatar";
+import { toastoptions } from "@/lib/utils";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 import Image from "next/image";
 
-interface Data{
-  email:string;
-  password:string;
-  name:string;
+interface Data {
+  email: string;
+  password: string;
+  name: string;
 }
 const Connection = () => {
   const [data, setdata] = useState<Data>({
-    name:"",
-    email:"",
-    password:""
-  })
+    name: "",
+    email: "",
+    password: "",
+  });
+
   const { data: session } = useSession();
   console.log(session);
+  const [decoded, setdecoded] = useState<any>(null);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
+  let token;
+  useEffect(() => {
+    (async () => {
+      token = await getCookies();
+      if (token) {
+        let check = decodeToken(token?.value ?? "");
 
-  const handleLogin = async(e: React.FormEvent) => {
+        check
+          ? (() => {
+              toast.success("Logged in successfully", toastoptions);
+              setdecoded(check);
+            })()
+          : toast.error("Invalid Token.Try again", toastoptions);
+        console.log(check, session, decoded);
+      }
+    })();
+  }, []);
+
+  const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     let res = await fetch("/api/customauth/login", {
       method: "POST",
@@ -39,11 +72,22 @@ const Connection = () => {
       },
       body: JSON.stringify(data),
     });
-    console.log(await res.json())
+    let result = await res.json();
+    token = await getCookies();
+    if (token) {
+      let check = decodeToken(token?.value ?? "");
+      check
+        ? (() => {
+            toast.success("Logged in successfully", toastoptions);
+            setdecoded(check);
+          })()
+        : toast.error("Invalid Token.Try again", toastoptions);
+    }
     setIsDialogOpen(false);
+    setdata({ name: "", email: "", password: "" });
   };
 
-  const handleSignup = async(e: React.FormEvent) => {
+  const handleSignup = async (e: React.FormEvent) => {
     e.preventDefault();
     let res = await fetch("/api/customauth/signup", {
       method: "POST",
@@ -52,61 +96,82 @@ const Connection = () => {
       },
       body: JSON.stringify(data),
     });
-    console.log(await res.json())
+    let result = await res.json();
+    token = await getCookies();
+    if (token) {
+      let check = decodeToken(token?.value ?? "");
+
+      check
+        ? (() => {
+            toast.success("Logged in successfully", toastoptions);
+            setdecoded(check);
+          })()
+        : toast.error("Invalid Token.Try again", toastoptions);
+    }
     setIsDialogOpen(false);
+    setdata({ name: "", email: "", password: "" });
   };
 
-  const handlechange=(e:React.ChangeEvent<HTMLInputElement>) => {
-    setdata({...data,[e.target.id]:e.target.value})
-  }
-  const handlesignup = (e:React.FormEvent<HTMLFormElement>) => {
-    e.preventDefault();
-    console.log(data)
+  const handlechange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setdata({ ...data, [e.target.id]: e.target.value });
+  };
+  const handleSignout = async () => {
+    if (session) signOut();
+    else{let token = await clearCookies();
+    setdecoded(null);
     setIsDialogOpen(false);
-
+    toast.success("Logged out successfully", toastoptions);
   }
-  
+  };
 
   return (
     <>
       <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
         <DialogTrigger asChild>
-          {session ? (
-            <Button variant={"link"} className="p-0">
-              <img
-                height={100}
-                width={100}
-                src={session.user?.image ?? ""}
-                alt="profile"
-                className="w-full h-full rounded-full"
-                loading="lazy"
-              />
+          {session || decoded ? (
+            <Button variant={"link"} size={"icon"} className="p-0">
+              <DropdownMenu>
+                <DropdownMenuTrigger>
+                  {session ? (
+                    <img
+                      height={100}
+                      width={100}
+                      src={session.user?.image ?? ""}
+                      alt="avatar"
+                      className="w-full h-full rounded-full"
+                    />
+                  ) : (
+                    <Avatar>
+                      <AvatarImage src="https://github.com/shadcn.png" />
+                      <AvatarFallback>io</AvatarFallback>
+                    </Avatar>
+                  )}
+                </DropdownMenuTrigger>
+                <DropdownMenuContent>
+                  <DropdownMenuLabel>
+                    Welcome{" "}
+                    {(session && session.user?.name) ?? decoded.username}
+                  </DropdownMenuLabel>
+                  <div>
+                    <Button onClick={handleSignout} className="w-full">
+                      Logout
+                    </Button>
+                  </div>
+                </DropdownMenuContent>
+              </DropdownMenu>
             </Button>
           ) : (
             <Button variant="outline">Login / Signup</Button>
           )}
         </DialogTrigger>
-        <DialogContent className="sm:max-w-[425px]">
-          <DialogHeader>
-            <DialogTitle>
-              {session ? "My Account" : "Login / Signup"}
-            </DialogTitle>
-            <DialogDescription>
-              {session
-                ? "Manage your account or log out."
-                : "Login to your account or create a new one."}
-            </DialogDescription>
-          </DialogHeader>
-          {session ? (
-            <div className="space-y-4">
-              <h4 className="font-medium text-sm">
-                Welcome back! {session.user?.name}
-              </h4>
-              <Button onClick={() => signOut()} className="w-full">
-                Logout
-              </Button>
-            </div>
-          ) : (
+        {!(session || decoded) && (
+          <DialogContent className="sm:max-w-[425px]">
+            <DialogHeader>
+              <DialogTitle>Login / Signup</DialogTitle>
+              <DialogDescription>
+                Login to your account or create a new one.
+              </DialogDescription>
+            </DialogHeader>
             <Tabs defaultValue="login" className="w-full">
               <TabsList className="grid w-full grid-cols-2">
                 <TabsTrigger value="login">Login</TabsTrigger>
@@ -116,11 +181,23 @@ const Connection = () => {
                 <form onSubmit={handleLogin} className="space-y-4">
                   <div className="space-y-2">
                     <Label htmlFor="email">Email</Label>
-                    <Input value={data.email} id="email" type="email" required onChange={(e)=>handlechange(e)}/>
+                    <Input
+                      value={data.email}
+                      id="email"
+                      type="email"
+                      required
+                      onChange={(e) => handlechange(e)}
+                    />
                   </div>
                   <div className="space-y-2">
                     <Label htmlFor="password">Password</Label>
-                    <Input value={data.password} id="password" type="password" required onChange={(e)=>handlechange(e)}/>
+                    <Input
+                      value={data.password}
+                      id="password"
+                      type="password"
+                      required
+                      onChange={(e) => handlechange(e)}
+                    />
                   </div>
                   <Button type="submit" className="w-full">
                     Login
@@ -131,15 +208,33 @@ const Connection = () => {
                 <form onSubmit={handleSignup} className="space-y-3">
                   <div className="space-y-2">
                     <Label htmlFor="signup-email">Name</Label>
-                    <Input value={data.name} id="name" type="name" required onChange={(e)=>handlechange(e)}/>
+                    <Input
+                      value={data.name}
+                      id="name"
+                      type="name"
+                      required
+                      onChange={(e) => handlechange(e)}
+                    />
                   </div>
                   <div className="space-y-2">
                     <Label htmlFor="signup-password">Email</Label>
-                    <Input value={data.email} id="email" type="email" required onChange={(e)=>handlechange(e)}/>
+                    <Input
+                      value={data.email}
+                      id="email"
+                      type="email"
+                      required
+                      onChange={(e) => handlechange(e)}
+                    />
                   </div>
                   <div className="space-y-2">
                     <Label htmlFor="confirm-password">Password</Label>
-                    <Input value={data.password} id="password" type="password" required onChange={(e)=>handlechange(e)}/>
+                    <Input
+                      value={data.password}
+                      id="password"
+                      type="password"
+                      required
+                      onChange={(e) => handlechange(e)}
+                    />
                   </div>
                   <Button type="submit" className="w-full">
                     Sign Up
@@ -192,8 +287,8 @@ const Connection = () => {
                 </Button>
               </div>
             </Tabs>
-          )}
-        </DialogContent>
+          </DialogContent>
+        )}
       </Dialog>
     </>
   );

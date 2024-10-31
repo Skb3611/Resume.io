@@ -4,9 +4,7 @@ import TwitterProvider from "next-auth/providers/twitter";
 import LinkedInProvider from "next-auth/providers/linkedin";
 import { NextApiRequest, NextApiResponse } from "next";
 import { PrismaAdapter } from "@auth/prisma-adapter";
-import { PrismaClient } from "@prisma/client";
 import { prisma } from "@/lib/prisma";
-import { Session } from "inspector/promises";
 
 export const authOptions = {
   providers: [
@@ -20,7 +18,7 @@ export const authOptions = {
       version: "2.0",
       authorization: {
         params: {
-          include_email: 'true', // Request user's email
+          include_email: "true", // Request user's email
         },
       },
     }),
@@ -69,27 +67,24 @@ export const authOptions = {
     signIn: "/",
     signOut: "/",
   },
-  session:{strategy: "jwt" as SessionStrategy},
+  session: { strategy: "jwt" as SessionStrategy },
   callbacks: {
-    
     async jwt({ token, account }: { token: any; account?: any }) {
       if (account) {
-        console.log(account)
-        token.access_token = account.access_token;  // Manually add access_token
+        console.log(account);
+        token.access_token = account.access_token; // Manually add access_token
       }
       return token;
     },
     async session({ session, token }: { session: any; token: any }) {
-      console.log(session,token)
+      console.log(session, token);
       session.access_token = token.access_token;
       return session;
     },
-    async redirect({ url, baseUrl }: { url: any; baseUrl: any; }) {
-
+    async redirect({ url, baseUrl }: { url: any; baseUrl: any }) {
       return baseUrl; // Default redirect
     },
   },
- 
 };
 
 export const GET = (req: NextApiRequest, res: NextApiResponse) =>

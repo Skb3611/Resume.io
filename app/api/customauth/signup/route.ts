@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import bcrypt from "bcrypt";
 import { randomUUID } from "crypto";
+import { signToken } from "@/lib/jwt";
 export async function POST(req: Request) {
   try {
     const { name, email, password } = await req.json();
@@ -10,7 +11,7 @@ export async function POST(req: Request) {
             email:email
         }
     })
-    if(user) return NextResponse.json({error:"Email already exists"})
+    if(user) return NextResponse.json({messsage:"Email already exists",status:false})
     let hashedPassword = await bcrypt.hash(password,10);
     user = await prisma.user.create({
       data: {
@@ -28,10 +29,13 @@ export async function POST(req: Request) {
         }
     })
 
-    return NextResponse.json({ message: "User created successfully" });
+    let response = NextResponse.json({ message: "User created successfully",status:true,username:name});
+    let token = signToken(user.name ?? "");
+    response.cookies.set('token',token,{httpOnly:true,path:'/',secure:true});
+    return response
     
   } catch (error:any) {
     console.log(error);
-    return NextResponse.json({ error: error.message });
+    return NextResponse.json({ message: error.message,status:false });
   }
 }
