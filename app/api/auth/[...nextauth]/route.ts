@@ -1,4 +1,4 @@
-import NextAuth, { SessionStrategy } from "next-auth";
+import NextAuth, { AuthOptions, SessionStrategy } from "next-auth";
 import GoogleProvider from "next-auth/providers/google";
 import TwitterProvider from "next-auth/providers/twitter";
 import LinkedInProvider from "next-auth/providers/linkedin";
@@ -6,7 +6,7 @@ import { NextApiRequest, NextApiResponse } from "next";
 import { PrismaAdapter } from "@auth/prisma-adapter";
 import { prisma } from "@/lib/prisma";
 
-export const authOptions = {
+const authOptions:AuthOptions = {
   providers: [
     GoogleProvider({
       clientId: process.env.GOOGLE_CLIENT_ID ?? "",
@@ -87,7 +87,6 @@ export const authOptions = {
   },
 };
 
-export const GET = (req: NextApiRequest, res: NextApiResponse) =>
-  NextAuth(req, res, authOptions);
-export const POST = (req: NextApiRequest, res: NextApiResponse) =>
-  NextAuth(req, res, authOptions);
+const handler = NextAuth(authOptions);
+export { handler as GET, handler as POST };
+

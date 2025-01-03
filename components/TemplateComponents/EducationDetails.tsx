@@ -2,17 +2,9 @@
 import React, { useState } from "react";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
-import { format } from "date-fns";
-import { Calendar as CalendarIcon } from "lucide-react";
-import { Card, CardContent } from "@/components/ui/card";
-import { cn } from "@/lib/utils";
+import { Calendar as CalendarIcon, Plus } from "lucide-react";
+import { Card, CardContent, CardFooter } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Calendar } from "@/components/ui/calendar";
-import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from "@/components/ui/popover";
 import { EducationData } from "@/app/editor/page";
 import {
   Carousel,
@@ -21,6 +13,7 @@ import {
   CarouselNext,
   CarouselPrevious,
 } from "@/components/ui/carousel";
+import { DatePicker } from "../DatePicker";
 
 const EducationDetails = ({
   data,
@@ -30,11 +23,10 @@ const EducationDetails = ({
   setdata: React.Dispatch<React.SetStateAction<EducationData[]>>;
 
 }) => {
-  const [index, setindex] = useState(1);
+  
 
   const addCard = () => {
-    setdata([...data, { index: index, date: null, degree: "", location: "",university:"" }]);
-    setindex(index + 1);
+    setdata([...data, { index: data.length, date: null, degree: "", location: "",university:"" }]);
   };
   const handleInputChange = (
     cardIndex: number,
@@ -47,13 +39,15 @@ const EducationDetails = ({
       )
     );
   };
-  const removeCard = () => {
+  const removeCard = (index: number) => {
     if (data.length === 1) return;
-    setdata(data.slice(0, data.length - 1));
+    setdata(data.filter((item) => index !== item.index));
+    data.forEach(item=>{
+      if(item.index!=0) item.index=item.index-1;
+    })
   };
   return (
     <div>
-      <h1 className="font-semibold text-lg mb-3"> Education Details</h1>
       <div className="flex flex-wrap gap-2">
         <Carousel className="w-[90%] mx-auto">
           <CarouselContent>
@@ -62,6 +56,7 @@ const EducationDetails = ({
                 <CardWrapper
                   handleInputChange={handleInputChange}
                   data={item}
+                  removeCard={removeCard}
                 />
               </CarouselItem>
             ))}
@@ -71,18 +66,11 @@ const EducationDetails = ({
         </Carousel>
       </div>
 
-      <div className="btns space-x-3">
-        <Button className="mt-4" onClick={addCard}>
-          Add More
+      
+        <Button className="text-foreground ml-5 mt-2" onClick={addCard} variant={"link"} >
+        Add More <Plus className="h-4" /> 
         </Button>
-        <Button
-          className="mt-4"
-          disabled={data.length === 1}
-          onClick={removeCard}
-        >
-          Remove
-        </Button>
-      </div>
+      
     </div>
   );
 };
@@ -92,6 +80,7 @@ export default EducationDetails;
 const CardWrapper = ({
   data,
   handleInputChange,
+  removeCard
 }: {
   data: EducationData;
   handleInputChange: (
@@ -99,10 +88,11 @@ const CardWrapper = ({
     field: keyof EducationData,
     value: string | Date
   ) => void;
+  removeCard: (index: number) => void;
 }) => {
   return (
     <Card className="p-4">
-      <CardContent>
+      <CardContent className="pb-2">
         <div className="mb-2">
           <Label htmlFor="degree">Degree</Label>
           <Input
@@ -141,46 +131,13 @@ const CardWrapper = ({
           />
         </div>
       </CardContent>
+      <CardFooter className="p-0 flex justify-end">
+        <Button variant={"outline"} className="text-foreground" onClick={()=>removeCard(data.index)} >
+          Remove
+        </Button>
+      </CardFooter>
     </Card>
   );
 };
 
-function DatePicker({
-  handleInputChange,
-  data,
-}: {
-  handleInputChange: (
-    index: number,
-    field: keyof EducationData,
-    value: string | Date
-  ) => void;
-  data: EducationData;
-}) {
-  const setDateFunc = (date: Date | undefined) => {
-    handleInputChange(data.index, "date", date || "");
-  };
-  return (
-    <Popover>
-      <PopoverTrigger asChild>
-        <Button
-          variant={"outline"}
-          className={cn(
-            "w-full justify-start text-left font-normal",
-            !data.date && "text-muted-foreground"
-          )}
-        >
-          <CalendarIcon className="mr-2 h-4 w-4" />
-          {data.date ? format(data.date, "PPP") : <span>Pick a date</span>}
-        </Button>
-      </PopoverTrigger>
-      <PopoverContent className="w-auto p-0">
-        <Calendar
-          mode="single"
-          selected={data.date || undefined}
-          onSelect={setDateFunc}
-          initialFocus
-        />
-      </PopoverContent>
-    </Popover>
-  );
-}
+

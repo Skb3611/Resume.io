@@ -1,11 +1,34 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   images: {
-    domains: [
-      "lh3.googleusercontent.com", // Google
-      "pbs.twimg.com",             // Twitter
-      "media.licdn.com"            // LinkedIn
-    ],
+    remotePatterns:[
+      {
+        protocol: 'https',
+        hostname: 'lh3.googleusercontent.com',
+        port: '',
+        pathname: '/**',
+      },
+      {
+        protocol: 'https',
+        hostname: 'pub-8915c2ad1d8147cc9ae47d1905b82505.r2.dev',
+        port: '',
+        pathname: '/**',
+      },
+      {
+        protocol: 'https',
+        hostname: 'media.licdn.com',
+        port: '',
+        pathname: '/**',
+      },
+      {
+        protocol: 'https',
+        hostname: 'pbs.twimg.com',
+        port: '',
+        pathname: '/**',
+      },
+      
+    ]
+  
   },
     eslint: {
         // Disable ESLint during production builds

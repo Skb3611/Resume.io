@@ -1,7 +1,7 @@
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
-import React, { useState } from "react";
+import React from "react";
 import { PersonalData } from "@/app/editor/page";
 export default function data({
   data,
@@ -17,7 +17,6 @@ export default function data({
   };
   return (
     <>
-      <h1 className="text-lg font-semibold">Personal Details</h1>
       <div>
         <Label htmlFor="name">Name</Label>
         <Input
@@ -45,6 +44,7 @@ export default function data({
           onChange={handleChange}
           value={data?.aboutme || ""}
           name="aboutme"
+          rows={3}
         ></Textarea>
       </div>
       <div>

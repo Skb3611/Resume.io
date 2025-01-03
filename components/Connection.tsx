@@ -16,7 +16,7 @@ import { Input } from "./ui/input";
 import { getCookies, clearCookies } from "@/lib/getcookies";
 import { decodeToken } from "@/lib/jwt";
 import { toast } from "react-toastify";
-
+import jwt, { JwtPayload } from "jsonwebtoken";
 import { Avatar, AvatarFallback, AvatarImage } from "./ui/avatar";
 import { toastoptions } from "@/lib/utils";
 import {
@@ -28,6 +28,8 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import Image from "next/image";
+import { LogOut, Settings, User } from "lucide-react";
+import { useRouter } from "next/navigation";
 
 interface Data {
   email: string;
@@ -40,9 +42,9 @@ const Connection = () => {
     email: "",
     password: "",
   });
-
+  const router = useRouter();
   const { data: session } = useSession();
-  console.log(session);
+  // console.log(session);
   const [decoded, setdecoded] = useState<any>(null);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   let token;
@@ -50,15 +52,19 @@ const Connection = () => {
     (async () => {
       token = await getCookies();
       if (token) {
-        let check = decodeToken(token?.value ?? "");
+        let check = decodeToken(token?.value ?? "") as JwtPayload;
 
         check
-          ? (() => {
+          ? (async () => {
+              if (check.exp && check.exp < new Date().getTime() / 1000) {
+                toast.error("Invalid Token.Try again", toastoptions);
+                await clearCookies();
+                return;
+              }
               toast.success("Logged in successfully", toastoptions);
               setdecoded(check);
             })()
           : toast.error("Invalid Token.Try again", toastoptions);
-        console.log(check, session, decoded);
       }
     })();
   }, []);
@@ -73,6 +79,9 @@ const Connection = () => {
       body: JSON.stringify(data),
     });
     let result = await res.json();
+    // console.log(result);
+    if (result.status == false)
+      return toast.error(result.message, toastoptions);
     token = await getCookies();
     if (token) {
       let check = decodeToken(token?.value ?? "");
@@ -97,16 +106,21 @@ const Connection = () => {
       body: JSON.stringify(data),
     });
     let result = await res.json();
-    token = await getCookies();
-    if (token) {
-      let check = decodeToken(token?.value ?? "");
+    // console.log(result);
+    if (result.status == false)
+      return toast.error(result.message, toastoptions);
+    else {
+      token = await getCookies();
+      if (token) {
+        let check = decodeToken(token?.value ?? "");
 
-      check
-        ? (() => {
-            toast.success("Logged in successfully", toastoptions);
-            setdecoded(check);
-          })()
-        : toast.error("Invalid Token.Try again", toastoptions);
+        check
+          ? (() => {
+              toast.success("Logged in successfully", toastoptions);
+              setdecoded(check);
+            })()
+          : toast.error("Invalid Token.Try again", toastoptions);
+      }
     }
     setIsDialogOpen(false);
     setdata({ name: "", email: "", password: "" });
@@ -117,11 +131,12 @@ const Connection = () => {
   };
   const handleSignout = async () => {
     if (session) signOut();
-    else{let token = await clearCookies();
-    setdecoded(null);
-    setIsDialogOpen(false);
-    toast.success("Logged out successfully", toastoptions);
-  }
+    else {
+      let token = await clearCookies();
+      setdecoded(null);
+      setIsDialogOpen(false);
+      toast.success("Logged out successfully", toastoptions);
+    }
   };
 
   return (
@@ -133,13 +148,18 @@ const Connection = () => {
               <DropdownMenu>
                 <DropdownMenuTrigger>
                   {session ? (
-                    <img
-                      height={100}
-                      width={100}
-                      src={session.user?.image ?? ""}
-                      alt="avatar"
-                      className="w-full h-full rounded-full"
-                    />
+                    // <img
+                    //   height={100}
+                    //   width={100}
+                    //   src={session.user?.image ?? ""}
+                    //   alt="avatar"
+                    //   className="w-full h-full rounded-full"
+                    //   loading="lazy"
+                    // />
+                    <Avatar>
+                      <AvatarImage src={session.user?.image ?? ""} />
+                      <AvatarFallback>io</AvatarFallback>
+                    </Avatar>
                   ) : (
                     <Avatar>
                       <AvatarImage src="https://github.com/shadcn.png" />
@@ -147,16 +167,44 @@ const Connection = () => {
                     </Avatar>
                   )}
                 </DropdownMenuTrigger>
-                <DropdownMenuContent>
-                  <DropdownMenuLabel>
-                    Welcome{" "}
-                    {(session && session.user?.name) ?? decoded.username}
+                <DropdownMenuContent
+                  className="w-56 mt-1"
+                  align="end"
+                  forceMount
+                >
+                  <DropdownMenuLabel className="font-normal">
+                    <div className="flex flex-col space-y-1">
+                      <p className="text-sm font-medium leading-none">
+                        {(session && session.user?.name) ?? decoded.username}
+                      </p>
+                      <p className="text-xs leading-none text-muted-foreground">
+                        {(session && session.user?.email) ?? decoded?.useremail}
+                      </p>
+                    </div>
                   </DropdownMenuLabel>
-                  <div>
-                    <Button onClick={handleSignout} className="w-full">
-                      Logout
+                  <DropdownMenuSeparator />
+                  <DropdownMenuItem>
+                    <Button
+                      variant={"link"}
+                      className="h-5 text-foreground"
+                      onClick={() => router.push("/dashboard")}
+                    >
+                      <User className="mr-2 h-4 w-4" />
+                      <span>Profile</span>
                     </Button>
-                  </div>
+                  </DropdownMenuItem>
+
+                  <DropdownMenuSeparator />
+                  <DropdownMenuItem>
+                    <Button
+                      variant={"link"}
+                      className="h-5 text-foreground"
+                      onClick={handleSignout}
+                    >
+                      <LogOut className="mr-2 h-4 w-4" />
+                      <span>Log out</span>
+                    </Button>
+                  </DropdownMenuItem>
                 </DropdownMenuContent>
               </DropdownMenu>
             </Button>
@@ -248,8 +296,8 @@ const Connection = () => {
                   className="w-full flex items-center justify-center py-5"
                   onClick={() => signIn("google")}
                 >
-                  <img
-                    src="https://authjs.dev/img/providers/google.svg"
+                  <Image
+                    src="/logos/google.png"
                     alt="Google logo"
                     width={25}
                     height={25}
@@ -262,12 +310,12 @@ const Connection = () => {
                   className="w-full flex items-center justify-center py-5"
                   onClick={() => signIn("twitter")}
                 >
-                  <img
-                    src="https://authjs.dev/img/providers/twitter.svg"
+                  <Image
+                    src="/logos/twitter.png"
                     alt="Twitter logo"
                     width={25}
                     height={25}
-                    className="mr-2"
+                    className="mr-2 "
                   />
                   Continue with Twitter
                 </Button>
@@ -276,8 +324,8 @@ const Connection = () => {
                   className="w-full flex items-center justify-center py-5"
                   onClick={() => signIn("linkedin")}
                 >
-                  <img
-                    src="https://authjs.dev/img/providers/linkedin.svg"
+                  <Image
+                    src="/logos/linkedin.png"
                     alt="LinkedIn logo"
                     width={25}
                     height={25}

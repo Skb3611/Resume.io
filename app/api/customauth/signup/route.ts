@@ -11,7 +11,7 @@ export async function POST(req: Request) {
             email:email
         }
     })
-    if(user) return NextResponse.json({messsage:"Email already exists",status:false})
+    if(user) return NextResponse.json({message:"Email already in use.",status:false})
     let hashedPassword = await bcrypt.hash(password,10);
     user = await prisma.user.create({
       data: {
@@ -30,12 +30,12 @@ export async function POST(req: Request) {
     })
 
     let response = NextResponse.json({ message: "User created successfully",status:true,username:name});
-    let token = signToken(user.name ?? "");
+    let token = signToken(user.name ?? "",user.email ?? "");
     response.cookies.set('token',token,{httpOnly:true,path:'/',secure:true});
     return response
     
   } catch (error:any) {
     console.log(error);
-    return NextResponse.json({ message: error.message,status:false });
+    return NextResponse.json({ message: "Opps! Something went wrong",status:false});
   }
 }

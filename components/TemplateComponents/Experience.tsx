@@ -1,9 +1,9 @@
 import React, { useState } from "react";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Label } from "../ui/label";
 import { Input } from "../ui/input";
 import { format } from "date-fns";
-import { Calendar as CalendarIcon } from "lucide-react";
+import { Calendar as CalendarIcon, Plus } from "lucide-react";
 
 import {
   Carousel,
@@ -47,9 +47,13 @@ const Experience = ({
     setindex(index + 1);
   };
 
-  const removeCard = () => {
+  const removeCard = (index: number) => {
     if (data.length === 1) return;
-    setdata(data.slice(0, data.length - 1));
+    setdata(data.filter((item) => index !== item.index));
+    data.forEach(item=>{
+      if(item.index!=0) item.index=item.index-1;
+    })
+
   };
   const handleInputChange = (
     CardIndex: number,
@@ -65,7 +69,6 @@ const Experience = ({
 
   return (
     <div className="mb-2">
-      <h1 className="font-semibold text-lg mb-3">Work Experience</h1>
 
       <Carousel className="w-[80%] mx-auto">
         <CarouselContent>
@@ -76,6 +79,7 @@ const Experience = ({
                   key={item.index}
                   data={item}
                   handleInputChange={handleInputChange}
+                  removeCard={removeCard}
                 />
               </CarouselItem>
             );
@@ -84,18 +88,9 @@ const Experience = ({
         <CarouselPrevious />
         <CarouselNext />
       </Carousel>
-      <div className="btns space-x-3">
-        <Button className="mt-3" onClick={addCard}>
-          Add More
+      <Button className="text-foreground ml-5" onClick={addCard} variant={"link"} >
+        Add More <Plus className="h-4" /> 
         </Button>
-        <Button
-          className="mt-3"
-          disabled={data.length === 1}
-          onClick={removeCard}
-        >
-          Remove
-        </Button>
-      </div>
     </div>
   );
 };
@@ -105,6 +100,7 @@ export default Experience;
 const CardWrapper = ({
   data,
   handleInputChange,
+  removeCard
 }: {
   data: ExperienceData;
   handleInputChange: (
@@ -112,6 +108,7 @@ const CardWrapper = ({
     field: keyof ExperienceData,
     value: string | Date
   ) => void;
+  removeCard: (index: number) => void;
 }) => {
   return (
     <>
@@ -119,7 +116,7 @@ const CardWrapper = ({
         <CardHeader className="p-4">
           <CardTitle>Add Your Experience</CardTitle>
         </CardHeader>
-        <CardContent className="py-2">
+        <CardContent className="pb-0">
           <div className="mb-3">
             <Label htmlFor="company">Company</Label>
             <Input
@@ -147,8 +144,10 @@ const CardWrapper = ({
             />
           </div>
 
-          <div className="flex flex-col gap-1 mb-2">
-            <Label htmlFor="startDate">Start Date</Label>
+            <Label  > Work Duration</Label>
+          <div className="dates flex mt-1 gap-2">
+
+          <div className="flex flex-col gap-1 mb-2 w-1/2">
             <DatePicker
               handleInputChange={handleInputChange}
               data={data}
@@ -156,14 +155,15 @@ const CardWrapper = ({
               value={data.startdate}
             />
           </div>
-          <div className="flex flex-col gap-1 mb-2">
-            <Label htmlFor="endDate">End Date</Label>
+          <div className="flex flex-col gap-1 mb-2 w-1/2">
+            {/* <Label htmlFor="endDate">End Date</Label> */}
             <DatePicker
               handleInputChange={handleInputChange}
               data={data}
               name="enddate"
               value={data.enddate}
             />
+          </div>
           </div>
           <div className="mb-2">
             <Label htmlFor="summary">Short Summary</Label>
@@ -172,13 +172,18 @@ const CardWrapper = ({
               id="summary"
               name="summary"
               placeholder="Short Summary"
-              rows={3}
+              rows={2}
               onChange={(e) =>
                 handleInputChange(data.index, "summary", e.target.value)
               }
             />
           </div>
         </CardContent>
+        <CardFooter className="py-2 flex justify-end">
+        <Button variant={"outline"} className="text-foreground" onClick={()=>removeCard(data.index)} >
+          Remove
+        </Button>
+      </CardFooter>
       </Card>
     </>
   );
@@ -215,7 +220,7 @@ function DatePicker({
           )}
         >
           <CalendarIcon className="mr-2 h-4 w-4" />
-          {value ? format(value, "PPP") : <span>Pick a date</span>}
+          {value ? format(value, "PPP") : <span>Pick  {name.toUpperCase()}</span>}
         </Button>
       </PopoverTrigger>
       <PopoverContent className="w-auto p-0">

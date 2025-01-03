@@ -6,9 +6,9 @@ if (!JWT_SECRET) {
   throw new Error("JWT_SECRET environment variable is not defined");
 }
 
-export const signToken = (username: string) => {
+export const signToken = (username: string , useremail:string) => {
   try {
-    return jwt.sign({ username }, JWT_SECRET, { expiresIn: "2h" });
+    return jwt.sign({ username,useremail }, JWT_SECRET, { expiresIn: "2h" });
   } catch (error) {
     console.error("Error signing token:", error);
     return "";
@@ -17,16 +17,11 @@ export const signToken = (username: string) => {
 
 export const verifyToken = (token: string) => {
   try {
-    const decoded = jwt.verify(token, JWT_SECRET);
-    return decoded;
+    return jwt.verify(token, JWT_SECRET);
+ 
   } catch (err) {
-    if (err instanceof jwt.TokenExpiredError) {
-      console.log('Token has expired');
-    } else if (err instanceof jwt.JsonWebTokenError) {
-      console.log('Token is invalid');
-    } else {
-      console.log('Verification failed:', err);
-    }
+    console.error("Error verifying token:", err);
+    return null;
   }
 
 };
